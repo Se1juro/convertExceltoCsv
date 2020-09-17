@@ -102,6 +102,7 @@ public class Controller {
             book.close();
             generateFileCsv(txtDestino.getText(),stringCsv);
             JOptionPane.showMessageDialog(null,"Se ha generado correctamente tu archivo CSV");
+            cleanData();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null,"ProyectoController.actionConvertir. Causa: " + e.getMessage());
         }
@@ -138,6 +139,10 @@ public class Controller {
 
         bw.write(String.valueOf(sb));
         bw.close();
+    }
+    public void cleanData(){
+        txtFile.setText("");
+        txtDestino.setText("");
     }
 }
 
