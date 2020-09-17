@@ -12,6 +12,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,6 +21,8 @@ import java.util.List;
 public class Controller {
     @FXML
     private TextField txtFile;
+    @FXML
+    private TextField txtDestino;
 
     public void onClickFile(javafx.event.ActionEvent event) {
         FileChooser win = null;
@@ -34,7 +37,7 @@ public class Controller {
                 txtFile.setText(path.getAbsolutePath());
             }
         } catch (Exception e) {
-            System.out.print("ProyectoController.actionSearchDestino. Causa: " + e.getMessage());
+            JOptionPane.showMessageDialog(null,"ProyectoController.actionOnClickFile. Causa: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -42,10 +45,12 @@ public class Controller {
     public void actionConvertir(ActionEvent event) {
         try {
             StringBuilder stringCsv = new StringBuilder();
-            stringCsv.append("Position;Id;Title;Type;Description;Points;Effort Estimated;Effort Remaining;Effort Spent;Status;Created by;Created on;Responsible;Sprint;Release;Component;Epic;Due Date;Priority;Severity;Issue Priority;Followers;Other Responsibles;Tags;Steps To Reproduce;User Story Id;User Story Title");
+            stringCsv.append("Position,Id,Title,Type,Description,Points,Effort Estimated,Effort Remaining,Effort Spent,Status,Created by,Created on,Responsible,Sprint,Release," +
+                    "Component,Epic,Due Date,Priority,Severity,Issue Priority,Followers,Other Responsibles,Tags,Steps To Reproduce,User Story Id,User Story Title\n");
             List<Object> headerOfExcel = new ArrayList<>();
             FileInputStream file = new FileInputStream(txtFile.getText());
-            XSSFWorkbook book = new XSSFWorkbook(file);
+            XSSFWorkbook book = new XSSFWorkbook(file);;
+
             //Tomamos la primera hoja
             XSSFSheet sheet = book.getSheetAt(0);
             //Recorremos una especie de lista
@@ -53,34 +58,87 @@ public class Controller {
             Iterator<Cell> celdas;
             Row fila;
             Cell celda;
+            List<String> dataToCsv = new ArrayList<String>();
+            int contadorUS=0;
+            int contadorTK=0;
             while (rows.hasNext()) {
                 fila = rows.next();
                 celdas = fila.cellIterator();
+                if (fila.getRowNum()!=0){
+                    if (fila.getCell(2).getStringCellValue().equals("US")){
+                        contadorUS++;
+                        stringCsv.append(contadorUS).append(",US-").append(contadorUS).append(",").append(fila.getCell(0).getStringCellValue())
+                                .append(",userstory").append(",").append(fila.getCell(3).getStringCellValue()).append(",10").append(",0.0").append(",0.0")
+                                .append(",0.0").append(",New").append(",").append(",").append(",").append(",Sprint 1").append(",").append(",").append(",")
+                                .append(",").append(",").append(",").append(",").append(",").append(",").append(",").append(",").append(",")
+                                .append(",").append("\n");
+                    }
+                }
                 while (celdas.hasNext()) {
                     celda = celdas.next();
                     switch (celda.getCellType()) {
+                        case Cell.CELL_TYPE_BLANK:
                         case Cell.CELL_TYPE_NUMERIC:
-                            if (fila.getRowNum()!=0) {
-                                System.out.println("Numero de columna "+celda.getColumnIndex());
-                                System.out.println(celda.getNumericCellValue());
-                            }
-                            break;
                         case Cell.CELL_TYPE_STRING:
                             if (fila.getRowNum()!=0) {
-                                System.out.println("Numero de columna "+celda.getColumnIndex());
-                                System.out.println(celda.getStringCellValue());
+                                if (fila.getCell(2).getStringCellValue().equals("TK")){
+
+                                    String data = celda.getStringCellValue().replace("\n"," ").replace(",","-");
+                                    dataToCsv.add(data);
+                                }
                             }
                             break;
                     }
                 }
+                if (dataToCsv.size()!=0){
+                    contadorTK++;
+                    stringCsv.append("" + ",TK-").append(contadorTK).append(",").append(dataToCsv.get(1)).append(",task").append(",").append(dataToCsv.get(4))
+                            .append(dataToCsv.get(5)).append(" ,").append(",0.0").append(",0.0").append(",0.0").append(",New").append(",").append(",").append(",")
+                            .append(",").append(",").append(",").append(",").append(",").append(",").append(",").append(",").append(",").append(",").append(",").append(",")
+                            .append(",").append("US-").append(contadorUS).append(",").append(dataToCsv.get(0)).append("\n");
+                    dataToCsv.clear();
+                }
             }
             book.close();
-
-
+            generateFileCsv(txtDestino.getText(),stringCsv);
+            JOptionPane.showMessageDialog(null,"Se ha generado correctamente tu archivo CSV");
         } catch (IOException e) {
+            JOptionPane.showMessageDialog(null,"ProyectoController.actionConvertir. Causa: " + e.getMessage());
+        }
+    }
+
+    public void onClickDestino(ActionEvent event) {
+        DirectoryChooser win = null;
+        Node source = (Node) event.getSource();
+        Window stage = source.getScene().getWindow();
+        File path = null;
+
+        try {
+
+            win = new DirectoryChooser();
+            path = win.showDialog(stage);
+
+            if (path != null) {
+                txtDestino.setText(path.getAbsolutePath() + "\\");
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,"ProyectoController.actionOnClickDestino. Causa: " + e.getMessage());
             e.printStackTrace();
         }
+    }
 
+    public void generateFileCsv(String destino, StringBuilder sb) throws IOException {
+        File file = new File(destino + "/" + "file.csv");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        FileWriter fw = new FileWriter(file);
+        BufferedWriter bw = new BufferedWriter(fw);
 
+        bw.write(String.valueOf(sb));
+        bw.close();
     }
 }
+
+

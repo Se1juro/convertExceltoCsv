@@ -14,7 +14,7 @@
             </font>
         </Label>
         <Button fx:id="btnFile" layoutX="319.0" layoutY="116.0" mnemonicParsing="false" onAction="#onClickFile" text="Archivo" />
-        <Button fx:id="btnDestino" layoutX="319.0" layoutY="167.0" mnemonicParsing="false" text="Destino" />
+        <Button fx:id="btnDestino" layoutX="319.0" layoutY="167.0" mnemonicParsing="false" text="Destino" onAction="#onClickDestino" />
         <TextField fx:id="txtFile" disable="true" layoutX="98.0" layoutY="116.0" prefHeight="25.0" prefWidth="205.0" />
         <TextField fx:id="txtDestino" disable="true" layoutX="98.0" layoutY="167.0" prefHeight="25.0" prefWidth="205.0" />
         <Button fx:id="btnConvertir" layoutX="98.0" layoutY="226.0" mnemonicParsing="false" onAction="#actionConvertir" prefHeight="35.0" prefWidth="93.0" text="Convertir" />
