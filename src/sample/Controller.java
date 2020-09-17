@@ -37,7 +37,7 @@ public class Controller {
                 txtFile.setText(path.getAbsolutePath());
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,"ProyectoController.actionOnClickFile. Causa: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "ProyectoController.actionOnClickFile. Causa: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -49,7 +49,8 @@ public class Controller {
                     "Component,Epic,Due Date,Priority,Severity,Issue Priority,Followers,Other Responsibles,Tags,Steps To Reproduce,User Story Id,User Story Title\n");
             List<Object> headerOfExcel = new ArrayList<>();
             FileInputStream file = new FileInputStream(txtFile.getText());
-            XSSFWorkbook book = new XSSFWorkbook(file);;
+            XSSFWorkbook book = new XSSFWorkbook(file);
+            ;
 
             //Tomamos la primera hoja
             XSSFSheet sheet = book.getSheetAt(0);
@@ -59,13 +60,14 @@ public class Controller {
             Row fila;
             Cell celda;
             List<String> dataToCsv = new ArrayList<String>();
-            int contadorUS=0;
-            int contadorTK=0;
+            int contadorUS = 0;
+            int contadorTK = 0;
+            double horasTarea = 0;
             while (rows.hasNext()) {
                 fila = rows.next();
                 celdas = fila.cellIterator();
-                if (fila.getRowNum()!=0){
-                    if (fila.getCell(2).getStringCellValue().equals("US")){
+                if (fila.getRowNum() != 0) {
+                    if (fila.getCell(2).getStringCellValue().equals("US")) {
                         contadorUS++;
                         stringCsv.append(contadorUS).append(",US-").append(contadorUS).append(",").append(fila.getCell(0).getStringCellValue())
                                 .append(",userstory").append(",").append(fila.getCell(3).getStringCellValue()).append(",10").append(",0.0").append(",0.0")
@@ -77,34 +79,42 @@ public class Controller {
                 while (celdas.hasNext()) {
                     celda = celdas.next();
                     switch (celda.getCellType()) {
-                        case Cell.CELL_TYPE_BLANK:
-                        case Cell.CELL_TYPE_NUMERIC:
-                        case Cell.CELL_TYPE_STRING:
-                            if (fila.getRowNum()!=0) {
-                                if (fila.getCell(2).getStringCellValue().equals("TK")){
 
-                                    String data = celda.getStringCellValue().replace("\n"," ").replace(",","-");
+                        case Cell.CELL_TYPE_NUMERIC:
+                            if (fila.getCell(2).getStringCellValue().equals("TK")) {
+                                horasTarea = celda.getNumericCellValue();
+                            }
+                            break;
+                        case Cell.CELL_TYPE_BLANK:
+                        case Cell.CELL_TYPE_STRING:
+                            if (fila.getRowNum() != 0) {
+                                if (fila.getCell(2).getStringCellValue().equals("TK") && fila.getCell(3).getNumericCellValue()>0) {
+                                    String data = celda.getStringCellValue().replace("\n", " ").replace(",", "-");
                                     dataToCsv.add(data);
                                 }
                             }
                             break;
                     }
                 }
-                if (dataToCsv.size()!=0){
+                if (dataToCsv.size() != 0) {
                     contadorTK++;
-                    stringCsv.append("" + ",TK-").append(contadorTK).append(",").append(dataToCsv.get(1)).append(",task").append(",").append(dataToCsv.get(4))
-                            .append(dataToCsv.get(5)).append(" ,").append(",0.0").append(",0.0").append(",0.0").append(",New").append(",").append(",").append(",")
+                    System.out.println("Tamaño list " + dataToCsv.size());
+                    System.out.println("Lista en la posicion 0 "+dataToCsv.get(0));
+                    System.out.println(dataToCsv);
+                    stringCsv.append("" + ",TK-").append(contadorTK).append(",").append(dataToCsv.get(1)).append(",task").append(",").append(dataToCsv.get(3))
+                            .append(dataToCsv.get(4)).append(" ,").append(",").append(horasTarea).append(",0.0").append(",0.0").append(",New").append(",").append(",").append(",")
                             .append(",").append(",").append(",").append(",").append(",").append(",").append(",").append(",").append(",").append(",").append(",").append(",")
                             .append(",").append("US-").append(contadorUS).append(",").append(dataToCsv.get(0)).append("\n");
                     dataToCsv.clear();
+                    horasTarea = 0;
                 }
             }
             book.close();
-            generateFileCsv(txtDestino.getText(),stringCsv);
-            JOptionPane.showMessageDialog(null,"Se ha generado correctamente tu archivo CSV");
+            generateFileCsv(txtDestino.getText(), stringCsv);
+            JOptionPane.showMessageDialog(null, "Se ha generado correctamente tu archivo CSV");
             cleanData();
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null,"ProyectoController.actionConvertir. Causa: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "ProyectoController.actionConvertir. Causa: " + e.getMessage());
         }
     }
 
@@ -124,7 +134,7 @@ public class Controller {
             }
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,"ProyectoController.actionOnClickDestino. Causa: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "ProyectoController.actionOnClickDestino. Causa: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -140,7 +150,8 @@ public class Controller {
         bw.write(String.valueOf(sb));
         bw.close();
     }
-    public void cleanData(){
+
+    public void cleanData() {
         txtFile.setText("");
         txtDestino.setText("");
     }
